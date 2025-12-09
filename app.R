@@ -207,11 +207,11 @@ ui <- page_navbar(
               ),
               div(style = "background: #27ae60; color: white; padding: 1rem; border-radius: 8px;",
                   h6("🏛️ Government Efficiency", style = "margin: 0;"),
-                  p(style = "margin: 0.5rem 0 0; font-size: 0.85rem;", "Public finance, tax policy, institutions, legislation")
+                  p(style = "margin: 0.5rem 0 0; font-size: 0.85rem;", "Public finance, tax policy, institutions, legislation, attitudes")
               ),
               div(style = "background: #8e44ad; color: white; padding: 1rem; border-radius: 8px;",
                   h6("💼 Business Efficiency", style = "margin: 0;"),
-                  p(style = "margin: 0.5rem 0 0; font-size: 0.85rem;", "Productivity, labor market, finance, management")
+                  p(style = "margin: 0.5rem 0 0; font-size: 0.85rem;", "Productivity, labor market, finance, management, social frame")
               ),
               div(style = "background: #e67e22; color: white; padding: 1rem; border-radius: 8px;",
                   h6("🏗️ Infrastructure", style = "margin: 0;"),
