@@ -274,8 +274,8 @@ create_country_radar <- function(data, country) {
     filter(Country == country) %>%
     select(EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score)
   
-  # Prepare for radar
-  values <- as.numeric(country_data[1, ])
+  # Prepare for radar - FIX: use unlist() to properly convert to numeric vector
+  values <- as.numeric(unlist(country_data[1, ]))
   categories <- c("Economic Performance", "Government Efficiency", 
                   "Business Efficiency", "Infrastructure")
   
