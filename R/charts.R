@@ -1,30 +1,42 @@
 # ============================================================================
-# CHARTS MODULE - GCC Competitiveness Dashboard
-# IMD World Competitiveness Ranking 2025
+# CHARTS.R - All Chart Functions for GCC Competitiveness Dashboard
 # ============================================================================
 
-# ==========================================================================
-# CHART 1: World Ranking Position
-# ==========================================================================
+library(plotly)
+library(dplyr)
+library(tidyr)
+library(scales)
+
+# Country color palette
+country_colors <- c(
+  "UAE" = "#000000",
+  "Qatar" = "#99154C",
+  "Saudi Arabia" = "#008035",
+  "Bahrain" = "#E20000",
+  "Kuwait" = "#00B1E6",
+  "Oman" = "#a3a3a3",
+  "GCC Average" = "#B8A358",
+  "GCC (Weighted)" = "#e41a1c",
+  "GCC (Simple)" = "#377eb8"
+)
+
+# ============================================================================
+# 1. WORLD RANKING CHART
+# ============================================================================
 create_world_ranking_chart <- function(data, gcc_method = "GCC (Weighted)", n_countries = 30) {
   
   world_data <- data$world_rankings_with_gcc %>%
-    filter(Rank <= n_countries | grepl("GCC", Country) | Region == "GCC Member")
+    filter(Rank <= n_countries | grepl("GCC", Country))
   
-  # Set colors based on region
+  # Determine colors
   world_data <- world_data %>%
     mutate(
       Color = case_when(
         Country == gcc_method ~ "#e41a1c",
-        Country %in% c("GCC (Simple)", "GCC (Weighted)") & Country != gcc_method ~ "#999999",
-        Region == "GCC Member" ~ "#377eb8",
+        Country %in% c("UAE", "Qatar", "Saudi Arabia", "Bahrain", "Kuwait", "Oman") ~ "#377eb8",
         TRUE ~ "#999999"
       ),
-      Alpha = case_when(
-        Country == gcc_method ~ 1,
-        Region == "GCC Member" ~ 0.8,
-        TRUE ~ 0.5
-      )
+      Label = paste0(Country, " (", round(Score, 1), ")")
     )
   
   plot_ly(
@@ -33,13 +45,15 @@ create_world_ranking_chart <- function(data, gcc_method = "GCC (Weighted)", n_co
     y = ~Score,
     type = "bar",
     marker = list(color = ~Color),
-    text = ~paste0(Country, "<br>Rank: #", Rank, "<br>Score: ", round(Score, 1)),
-    hoverinfo = "text"
+    text = ~round(Score, 1),
+    textposition = "outside",
+    hoverinfo = "text",
+    hovertext = ~paste0(Country, "<br>Score: ", round(Score, 1), "<br>Rank: ", Rank)
   ) %>%
     layout(
       title = list(
-        text = "<b>GCC as a Unified Entity: World Ranking Position</b><br><sup>If GCC were a single country, where would it rank globally?</sup>",
-        x = 0
+        text = "GCC as a Unified Entity: World Ranking Position",
+        font = list(size = 16)
       ),
       xaxis = list(
         title = "",
@@ -55,88 +69,69 @@ create_world_ranking_chart <- function(data, gcc_method = "GCC (Weighted)", n_co
     )
 }
 
-# ==========================================================================
-# CHART 2: Country Trajectory (5-year trend)
-# ==========================================================================
+# ============================================================================
+# 2. TRAJECTORY CHART (5-Year Trends)
+# ============================================================================
 create_trajectory_chart <- function(data, highlight = "All") {
   
-  # Define colors locally to avoid scope issues
-  country_colors <- c(
-    "UAE" = "#000000",
-    "Qatar" = "#99154C",
-    "Saudi Arabia" = "#008035",
-    "Bahrain" = "#E20000",
-    "Oman" = "#a3a3a3",
-    "Kuwait" = "#00B1E6",
-    "GCC Average" = "#B8A358"
-  )
+  # Get overall rankings over time
+  trend_data <- data$rankings_5yr %>%
+    filter(Factor == "Overall") %>%
+    select(Country, Y2021, Y2022, Y2023, Y2024, Y2025) %>%
+    pivot_longer(cols = starts_with("Y"), names_to = "Year", values_to = "Rank") %>%
+    mutate(Year = as.numeric(gsub("Y", "", Year))) %>%
+    filter(!is.na(Rank))
   
-  rankings <- data$overall_rankings %>%
-    filter(Year >= 2021) %>%
-    filter(!is.na(Overall_Rank))
-  
-  # Determine if we should highlight specific countries
-  # Handle cases where highlight is NULL, empty, or "All"
-  if (is.null(highlight)) {
-    highlight_countries <- unique(rankings$Country)
-  } else if (length(highlight) == 0) {
-    highlight_countries <- unique(rankings$Country)
-  } else if (length(highlight) == 1 && highlight[1] == "All") {
-    highlight_countries <- unique(rankings$Country)
+  # Determine which countries to show
+  if (!("All" %in% highlight) && length(highlight) > 0) {
+    trend_data <- trend_data %>%
+      mutate(
+        Show = Country %in% highlight,
+        Alpha = if_else(Show, 1, 0.2),
+        Width = if_else(Show, 3, 1)
+      )
   } else {
-    highlight_countries <- highlight
+    trend_data <- trend_data %>%
+      mutate(Show = TRUE, Alpha = 1, Width = 2)
   }
   
+  # Create plot
   p <- plot_ly()
   
-  for (country in unique(rankings$Country)) {
-    country_data <- rankings %>% filter(Country == country)
-    
-    # Get color for this country
-    if (country %in% names(country_colors)) {
-      color <- country_colors[[country]]
-    } else {
-      color <- "#888888"
-    }
-    
-    # Set opacity and line width based on whether country is highlighted
-    if (country %in% highlight_countries) {
-      alpha <- 1
-      lw <- 3
-    } else {
-      alpha <- 0.2
-      lw <- 1
-    }
+  for (ctry in unique(trend_data$Country)) {
+    ctry_data <- trend_data %>% filter(Country == ctry)
+    color <- if (ctry %in% names(country_colors)) country_colors[ctry] else "#999999"
+    alpha <- ctry_data$Alpha[1]
+    width <- ctry_data$Width[1]
     
     p <- p %>%
       add_trace(
-        data = country_data,
+        data = ctry_data,
         x = ~Year,
-        y = ~Overall_Rank,
+        y = ~Rank,
         type = "scatter",
         mode = "lines+markers",
-        name = country,
-        line = list(color = color, width = lw),
+        name = ctry,
+        line = list(color = color, width = width),
         marker = list(color = color, size = 8),
         opacity = alpha,
-        text = ~paste0(Country, " (", Year, ")<br>Rank: #", round(Overall_Rank, 1)),
-        hoverinfo = "text"
+        hoverinfo = "text",
+        hovertext = ~paste0(Country, "<br>Year: ", Year, "<br>Rank: ", Rank)
       )
   }
   
   p %>%
     layout(
       title = list(
-        text = "<b>GCC Competitiveness Journey: 2021-2025</b><br><sup>Tracking each country's ranking trajectory in the global arena</sup>",
-        x = 0
+        text = "GCC Competitiveness Journey: From 2021 to 2025",
+        font = list(size = 16)
       ),
       xaxis = list(
         title = "Year",
-        tickmode = "linear",
-        dtick = 1
+        tickvals = 2021:2025
       ),
       yaxis = list(
-        title = "Global Rank (Lower is Better)",
+        title = "Global Rank (lower is better)",
         autorange = "reversed",
         range = c(45, 0)
       ),
@@ -144,95 +139,17 @@ create_trajectory_chart <- function(data, highlight = "All") {
         orientation = "h",
         y = -0.2
       ),
-      shapes = list(
-        list(type = "rect", x0 = 2020.5, x1 = 2025.5, y0 = 0, y1 = 10,
-             fillcolor = "#27ae60", opacity = 0.1, line = list(width = 0)),
-        list(type = "rect", x0 = 2020.5, x1 = 2025.5, y0 = 10, y1 = 20,
-             fillcolor = "#f39c12", opacity = 0.1, line = list(width = 0))
-      )
+      hovermode = "closest"
     )
 }
 
-# ==========================================================================
-# CHART 3: Dimensions Comparison (Bar Chart)
-# ==========================================================================
-create_dimensions_chart <- function(data, gcc_method = "GCC (Weighted)") {
+# ============================================================================
+# 3. COMPARISON CHART (Simple vs GDP-Weighted)
+# ============================================================================
+create_comparison_chart <- function(data) {
   
-  gcc_data <- data$factors_2025 %>%
-    filter(Country == gcc_method) %>%
-    select(ends_with("_Score"), ends_with("_Rank")) %>%
-    pivot_longer(
-      cols = everything(),
-      names_to = c("Dimension", ".value"),
-      names_pattern = "(.+)_(Score|Rank)"
-    ) %>%
-    mutate(
-      Dimension = case_when(
-        Dimension == "Overall" ~ "Overall",
-        Dimension == "EconPerf" ~ "Economic Performance",
-        Dimension == "GovEff" ~ "Government Efficiency",
-        Dimension == "BusEff" ~ "Business Efficiency",
-        Dimension == "Infra" ~ "Infrastructure"
-      ),
-      Performance = case_when(
-        Score >= 80 ~ "Strong",
-        Score >= 65 ~ "Good",
-        TRUE ~ "Moderate"
-      ),
-      Color = case_when(
-        Performance == "Strong" ~ "#27ae60",
-        Performance == "Good" ~ "#f39c12",
-        TRUE ~ "#e67e22"
-      )
-    )
-  
-  plot_ly(
-    data = gcc_data,
-    x = ~Dimension,
-    y = ~Score,
-    type = "bar",
-    marker = list(color = ~Color),
-    text = ~paste0("Score: ", round(Score, 1), "<br>Rank: #", round(Rank, 0)),
-    hoverinfo = "text+name"
-  ) %>%
-    add_trace(
-      y = ~Rank,
-      type = "scatter",
-      mode = "markers+text",
-      yaxis = "y2",
-      marker = list(color = "#c0392b", size = 12, symbol = "diamond"),
-      text = ~paste0("#", round(Rank, 0)),
-      textposition = "top center",
-      name = "Rank"
-    ) %>%
-    layout(
-      title = list(
-        text = paste0("<b>GCC GDP-Weighted Competitiveness Performance</b><br><sup>Scores and Average Rankings across Five Dimensions (69 countries ranked)</sup>"),
-        x = 0
-      ),
-      xaxis = list(title = ""),
-      yaxis = list(
-        title = "Score (0-100)",
-        range = c(0, 100)
-      ),
-      yaxis2 = list(
-        title = "Average Rank (lower is better)",
-        overlaying = "y",
-        side = "right",
-        range = c(50, 0)
-      ),
-      showlegend = FALSE,
-      barmode = "group"
-    )
-}
-
-# ==========================================================================
-# CHART 4: Country Heatmap
-# ==========================================================================
-create_heatmap_chart <- function(data) {
-  
-  heatmap_data <- data$factors_2025 %>%
-    filter(!grepl("GCC", Country)) %>%
+  comparison_data <- data$factors_2025 %>%
+    filter(Country %in% c("GCC (Simple)", "GCC (Weighted)")) %>%
     select(Country, Overall_Score, EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score) %>%
     pivot_longer(cols = -Country, names_to = "Dimension", values_to = "Score") %>%
     mutate(
@@ -243,6 +160,262 @@ create_heatmap_chart <- function(data) {
         Dimension == "BusEff_Score" ~ "Business\nEfficiency",
         Dimension == "Infra_Score" ~ "Infrastructure"
       ),
+      Dimension = factor(Dimension, levels = c("Overall", "Economic\nPerformance", 
+                                                "Government\nEfficiency", "Business\nEfficiency", 
+                                                "Infrastructure"))
+    )
+  
+  plot_ly(
+    data = comparison_data,
+    x = ~Dimension,
+    y = ~Score,
+    color = ~Country,
+    colors = c("GCC (Simple)" = "#377eb8", "GCC (Weighted)" = "#e41a1c"),
+    type = "bar",
+    text = ~round(Score, 1),
+    textposition = "outside",
+    hoverinfo = "text",
+    hovertext = ~paste0(Country, "<br>", Dimension, ": ", round(Score, 1))
+  ) %>%
+    layout(
+      title = list(text = "Simple Average vs GDP-Weighted", font = list(size = 14)),
+      xaxis = list(title = ""),
+      yaxis = list(title = "Score", range = c(0, 100)),
+      barmode = "group",
+      legend = list(orientation = "h", y = -0.15)
+    )
+}
+
+# ============================================================================
+# 4. GDP PIE CHART
+# ============================================================================
+create_gdp_pie_chart <- function(data) {
+  
+  gdp_data <- data$gdp_weights %>%
+    mutate(
+      Color = country_colors[Country],
+      Label = paste0(Country, "\n$", round(GDP_2024, 0), "B")
+    )
+  
+  plot_ly(
+    data = gdp_data,
+    labels = ~Country,
+    values = ~GDP_2024,
+    type = "pie",
+    textinfo = "label+percent",
+    textposition = "inside",
+    marker = list(colors = ~Color),
+    hoverinfo = "text",
+    hovertext = ~paste0(Country, "<br>GDP: $", round(GDP_2024, 1), "B<br>Weight: ", round(Weight_Pct, 1), "%")
+  ) %>%
+    layout(
+      title = list(text = "GDP Distribution (2024)", font = list(size = 14)),
+      showlegend = FALSE
+    )
+}
+
+# ============================================================================
+# 5. DIMENSIONS CHART (Bar chart with scores and ranks)
+# ============================================================================
+create_dimensions_chart <- function(data, gcc_method = "GCC (Weighted)") {
+  
+  dim_data <- data$factors_2025 %>%
+    filter(Country == gcc_method) %>%
+    select(EconPerf_Score, EconPerf_Rank, GovEff_Score, GovEff_Rank, 
+           BusEff_Score, BusEff_Rank, Infra_Score, Infra_Rank) %>%
+    pivot_longer(cols = everything(), names_to = "Metric", values_to = "Value") %>%
+    mutate(
+      Dimension = case_when(
+        grepl("EconPerf", Metric) ~ "Economic Performance",
+        grepl("GovEff", Metric) ~ "Government Efficiency",
+        grepl("BusEff", Metric) ~ "Business Efficiency",
+        grepl("Infra", Metric) ~ "Infrastructure"
+      ),
+      Type = if_else(grepl("Score", Metric), "Score", "Rank")
+    ) %>%
+    pivot_wider(names_from = Type, values_from = Value)
+  
+  # Color based on score
+  dim_data <- dim_data %>%
+    mutate(
+      Color = case_when(
+        Score >= 80 ~ "#27ae60",
+        Score >= 70 ~ "#2ecc71",
+        Score >= 60 ~ "#f39c12",
+        TRUE ~ "#e74c3c"
+      )
+    )
+  
+  plot_ly(
+    data = dim_data,
+    x = ~Dimension,
+    y = ~Score,
+    type = "bar",
+    marker = list(color = ~Color),
+    text = ~paste0(round(Score, 1), "\n(Rank: ", round(Rank), ")"),
+    textposition = "outside",
+    hoverinfo = "text",
+    hovertext = ~paste0(Dimension, "<br>Score: ", round(Score, 1), "<br>Rank: ", round(Rank))
+  ) %>%
+    layout(
+      title = list(text = "GCC Performance by Dimension", font = list(size = 14)),
+      xaxis = list(title = ""),
+      yaxis = list(title = "Score", range = c(0, 100)),
+      showlegend = FALSE
+    )
+}
+
+# ============================================================================
+# 6. COUNTRY RADAR CHART
+# ============================================================================
+create_country_radar <- function(data, country) {
+  
+  country_data <- data$factors_2025 %>%
+    filter(Country == country) %>%
+    select(EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score)
+  
+  # Prepare for radar
+  values <- as.numeric(country_data[1, ])
+  categories <- c("Economic Performance", "Government Efficiency", 
+                  "Business Efficiency", "Infrastructure")
+  
+  # Close the polygon by repeating first value
+  values <- c(values, values[1])
+  categories <- c(categories, categories[1])
+  
+  color <- if (country %in% names(country_colors)) country_colors[country] else "#1a5276"
+  
+  plot_ly(
+    type = "scatterpolar",
+    r = values,
+    theta = categories,
+    fill = "toself",
+    fillcolor = paste0(color, "40"),
+    line = list(color = color, width = 2),
+    marker = list(color = color, size = 8),
+    name = country,
+    hoverinfo = "text",
+    hovertext = paste0(categories[-length(categories)], ": ", round(values[-length(values)], 1))
+  ) %>%
+    layout(
+      polar = list(
+        radialaxis = list(
+          visible = TRUE,
+          range = c(0, 100),
+          tickvals = seq(0, 100, 25)
+        ),
+        angularaxis = list(
+          tickfont = list(size = 11)
+        )
+      ),
+      showlegend = FALSE,
+      title = list(text = paste(country, "- Factor Profile"), font = list(size = 14))
+    )
+}
+
+# ============================================================================
+# 7. COUNTRY TREND CHART (5-year by factor)
+# ============================================================================
+create_country_trend <- function(data, country) {
+  
+  trend_data <- data$rankings_5yr %>%
+    filter(Country == country) %>%
+    select(Factor, Y2021, Y2022, Y2023, Y2024, Y2025) %>%
+    pivot_longer(cols = starts_with("Y"), names_to = "Year", values_to = "Rank") %>%
+    mutate(Year = as.numeric(gsub("Y", "", Year))) %>%
+    filter(!is.na(Rank))
+  
+  factor_colors <- c(
+    "Overall" = "#1a5276",
+    "Econ Perf" = "#2980b9",
+    "Gov Eff" = "#27ae60",
+    "Bus Eff" = "#8e44ad",
+    "Infra" = "#e67e22"
+  )
+  
+  plot_ly(
+    data = trend_data,
+    x = ~Year,
+    y = ~Rank,
+    color = ~Factor,
+    colors = factor_colors,
+    type = "scatter",
+    mode = "lines+markers",
+    hoverinfo = "text",
+    hovertext = ~paste0(Factor, "<br>Year: ", Year, "<br>Rank: ", Rank)
+  ) %>%
+    layout(
+      title = list(text = paste(country, "- Factor Rankings Over Time"), font = list(size = 14)),
+      xaxis = list(title = "Year", tickvals = 2021:2025),
+      yaxis = list(title = "Rank (lower is better)", autorange = "reversed"),
+      legend = list(orientation = "h", y = -0.2),
+      hovermode = "closest"
+    )
+}
+
+# ============================================================================
+# 8. SUBFACTOR CHART
+# ============================================================================
+create_subfactor_chart <- function(data, country, factor_filter = "All") {
+  
+  subfactor_data <- data$subfactors_2025 %>%
+    filter(Country == country)
+  
+  if (factor_filter != "All") {
+    subfactor_data <- subfactor_data %>%
+      filter(Factor == factor_filter)
+  }
+  
+  # Color by factor
+  factor_colors <- c(
+    "Economic Performance" = "#2980b9",
+    "Government Efficiency" = "#27ae60",
+    "Business Efficiency" = "#8e44ad",
+    "Infrastructure" = "#e67e22"
+  )
+  
+  subfactor_data <- subfactor_data %>%
+    mutate(Color = factor_colors[Factor])
+  
+  plot_ly(
+    data = subfactor_data,
+    x = ~reorder(Sub_Factor, Score_2025),
+    y = ~Score_2025,
+    type = "bar",
+    marker = list(color = ~Color),
+    text = ~round(Score_2025, 1),
+    textposition = "outside",
+    hoverinfo = "text",
+    hovertext = ~paste0(Sub_Factor, "<br>Factor: ", Factor, "<br>Score: ", round(Score_2025, 1), "<br>Rank: ", Rank_2025)
+  ) %>%
+    layout(
+      title = list(text = paste(country, "- Sub-Factor Scores"), font = list(size = 14)),
+      xaxis = list(title = "", tickangle = -45),
+      yaxis = list(title = "Score", range = c(0, 100)),
+      showlegend = FALSE,
+      margin = list(b = 150)
+    ) %>%
+    layout(xaxis = list(categoryorder = "total ascending"))
+}
+
+# ============================================================================
+# 9. HEATMAP CHART
+# ============================================================================
+create_heatmap_chart <- function(data) {
+  
+  heatmap_data <- data$factors_2025 %>%
+    filter(!grepl("GCC", Country)) %>%
+    select(Country, Overall_Score, EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score) %>%
+    pivot_longer(cols = -Country, names_to = "Dimension", values_to = "Score") %>%
+    mutate(
+      Dimension = case_when(
+        Dimension == "Overall_Score" ~ "Overall",
+        Dimension == "EconPerf_Score" ~ "Econ Perf",
+        Dimension == "GovEff_Score" ~ "Gov Eff",
+        Dimension == "BusEff_Score" ~ "Bus Eff",
+        Dimension == "Infra_Score" ~ "Infrastructure"
+      ),
+      Dimension = factor(Dimension, levels = c("Overall", "Econ Perf", "Gov Eff", "Bus Eff", "Infrastructure")),
       Country = factor(Country, levels = c("UAE", "Qatar", "Saudi Arabia", "Bahrain", "Oman", "Kuwait"))
     )
   
@@ -252,35 +425,27 @@ create_heatmap_chart <- function(data) {
     y = ~Country,
     z = ~Score,
     type = "heatmap",
-    colorscale = list(
-      c(0, "#d73027"),
-      c(0.4, "#fee08b"),
-      c(0.6, "#d9ef8b"),
-      c(1, "#1a9850")
-    ),
+    colorscale = list(c(0, "#d73027"), c(0.5, "#fee08b"), c(1, "#1a9850")),
     zmin = 40,
     zmax = 100,
     text = ~round(Score, 1),
     texttemplate = "%{text}",
     hoverinfo = "text",
-    hovertext = ~paste0(Country, "<br>", Dimension, "<br>Score: ", round(Score, 1))
+    hovertext = ~paste0(Country, "<br>", Dimension, ": ", round(Score, 1))
   ) %>%
     layout(
-      title = list(
-        text = "<b>GCC Countries: Competitiveness Heatmap 2025</b><br><sup>Color intensity shows relative performance</sup>",
-        x = 0
-      ),
+      title = list(text = "GCC Countries: Competitiveness Heatmap", font = list(size = 14)),
       xaxis = list(title = ""),
       yaxis = list(title = "", autorange = "reversed")
     )
 }
 
-# ==========================================================================
-# CHART 5: Gap Analysis
-# ==========================================================================
+# ============================================================================
+# 10. GAP CHART
+# ============================================================================
 create_gap_chart <- function(data, gcc_method = "GCC (Weighted)") {
   
-  gcc_data <- data$factors_2025 %>%
+  gap_data <- data$factors_2025 %>%
     filter(Country == gcc_method) %>%
     select(Overall_Score, EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score) %>%
     pivot_longer(cols = everything(), names_to = "Dimension", values_to = "Score") %>%
@@ -292,277 +457,88 @@ create_gap_chart <- function(data, gcc_method = "GCC (Weighted)") {
         Dimension == "GovEff_Score" ~ "Government Efficiency",
         Dimension == "BusEff_Score" ~ "Business Efficiency",
         Dimension == "Infra_Score" ~ "Infrastructure"
-      )
+      ),
+      Dimension = factor(Dimension, levels = c("Infrastructure", "Economic Performance", 
+                                                "Government Efficiency", "Business Efficiency", "Overall"))
     )
   
-  plot_ly(data = gcc_data) %>%
-    add_trace(
+  plot_ly(data = gap_data) %>%
+    add_bars(
       y = ~Dimension,
       x = ~Score,
-      type = "bar",
-      orientation = "h",
       name = "Achieved",
-      marker = list(color = "#2980b9"),
+      marker = list(color = "#1a5276"),
+      orientation = "h",
       text = ~paste0(round(Score, 1), "%"),
       textposition = "inside",
       hoverinfo = "text",
       hovertext = ~paste0(Dimension, "<br>Score: ", round(Score, 1))
     ) %>%
-    add_trace(
+    add_bars(
       y = ~Dimension,
       x = ~Gap,
-      type = "bar",
-      orientation = "h",
       name = "Gap to 100",
-      marker = list(color = "#bdc3c7"),
+      marker = list(color = "#d3d3d3"),
+      orientation = "h",
       text = ~paste0(round(Gap, 1), "%"),
       textposition = "inside",
       hoverinfo = "text",
       hovertext = ~paste0(Dimension, "<br>Gap: ", round(Gap, 1))
     ) %>%
     layout(
-      title = list(
-        text = "<b>GCC Performance Gap Analysis</b><br><sup>Achieved scores vs. potential improvement to perfect score (100)</sup>",
-        x = 0
-      ),
-      xaxis = list(
-        title = "Percentage",
-        range = c(0, 100)
-      ),
+      title = list(text = "GCC Performance Gap Analysis", font = list(size = 14)),
+      xaxis = list(title = "Percentage", range = c(0, 100)),
       yaxis = list(title = ""),
       barmode = "stack",
       legend = list(orientation = "h", y = -0.15)
     )
 }
 
-# ==========================================================================
-# CHART 6: Radar Comparison
-# ==========================================================================
-create_radar_chart <- function(data, selected_country = "UAE", gcc_method = "GCC (Weighted)") {
+# ============================================================================
+# 11. OVERLAY RADAR CHART (Country vs GCC)
+# ============================================================================
+create_overlay_radar_chart <- function(data, selected_country, gcc_method = "GCC (Weighted)") {
   
-  radar_data <- data$factors_2025 %>%
-    filter(Country %in% c(selected_country, gcc_method)) %>%
-    select(Country, EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score) %>%
-    pivot_longer(cols = -Country, names_to = "Dimension", values_to = "Score") %>%
-    mutate(
-      Dimension = case_when(
-        Dimension == "EconPerf_Score" ~ "Economic Performance",
-        Dimension == "GovEff_Score" ~ "Government Efficiency",
-        Dimension == "BusEff_Score" ~ "Business Efficiency",
-        Dimension == "Infra_Score" ~ "Infrastructure"
-      )
-    )
-  
-  # Create radar chart using polar coordinates
-  p <- plot_ly(type = "scatterpolar", mode = "lines+markers")
-  
-  for (country in unique(radar_data$Country)) {
-    country_data <- radar_data %>% 
-      filter(Country == country) %>%
-      bind_rows(radar_data %>% filter(Country == country) %>% slice(1))
-    
-    color <- if(country %in% names(gcc_colors)) gcc_colors[country] else "#888888"
-    
-    p <- p %>%
-      add_trace(
-        r = c(country_data$Score, country_data$Score[1]),
-        theta = c(country_data$Dimension, country_data$Dimension[1]),
-        name = country,
-        fill = "toself",
-        fillcolor = paste0(color, "33"),
-        line = list(color = color, width = 2),
-        marker = list(color = color, size = 8)
-      )
-  }
-  
-  p %>%
-    layout(
-      title = list(
-        text = paste0("<b>", selected_country, " vs ", gcc_method, "</b><br><sup>Dimension comparison</sup>"),
-        x = 0.5
-      ),
-      polar = list(
-        radialaxis = list(
-          visible = TRUE,
-          range = c(0, 100)
-        )
-      ),
-      legend = list(orientation = "h", y = -0.1)
-    )
-}
-
-# ==========================================================================
-# CHART 7: Sub-factor Breakdown
-# ==========================================================================
-create_subfactor_chart <- function(data, selected_country = "UAE", selected_factor = "All") {
-  
-  subfactor_data <- data$subfactors_2025 %>%
-    filter(Country == selected_country)
-  
-  if (selected_factor != "All") {
-    subfactor_data <- subfactor_data %>% filter(Factor == selected_factor)
-  }
-  
-  subfactor_data <- subfactor_data %>%
-    mutate(
-      Color = case_when(
-        Score_2025 >= 75 ~ "#27ae60",
-        Score_2025 >= 60 ~ "#f39c12",
-        Score_2025 >= 50 ~ "#e67e22",
-        TRUE ~ "#c0392b"
-      )
-    )
-  
-  plot_ly(
-    data = subfactor_data,
-    y = ~reorder(Sub_Factor, Score_2025),
-    x = ~Score_2025,
-    type = "bar",
-    orientation = "h",
-    marker = list(color = ~Color),
-    text = ~paste0(round(Score_2025, 1), " (Rank #", Rank_2025, ")"),
-    textposition = "outside",
-    hoverinfo = "text",
-    hovertext = ~paste0(Sub_Factor, "<br>Factor: ", Factor, "<br>Score: ", round(Score_2025, 1), "<br>Rank: #", Rank_2025)
-  ) %>%
-    layout(
-      title = list(
-        text = paste0("<b>", selected_country, ": Sub-Factor Performance 2025</b>"),
-        x = 0
-      ),
-      xaxis = list(
-        title = "Score (0-100)",
-        range = c(0, 100)
-      ),
-      yaxis = list(title = ""),
-      margin = list(l = 180)
-    )
-}
-
-# ==========================================================================
-# CHART 8: 5-Year Factor Trend
-# ==========================================================================
-create_factor_trend_chart <- function(data, selected_country = "UAE") {
-  
-  trend_data <- data$rankings_5yr %>%
+  # Get country data
+  country_data <- data$factors_2025 %>%
     filter(Country == selected_country) %>%
-    pivot_longer(
-      cols = starts_with("Y"),
-      names_to = "Year",
-      values_to = "Rank"
+    select(EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score)
+  
+  # Get GCC data
+  gcc_data <- data$factors_2025 %>%
+    filter(Country == gcc_method) %>%
+    select(EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score)
+  
+  categories <- c("Economic Performance", "Government Efficiency", 
+                  "Business Efficiency", "Infrastructure", "Economic Performance")
+  
+  country_values <- c(as.numeric(country_data[1, ]), as.numeric(country_data[1, 1]))
+  gcc_values <- c(as.numeric(gcc_data[1, ]), as.numeric(gcc_data[1, 1]))
+  
+  country_color <- if (selected_country %in% names(country_colors)) country_colors[selected_country] else "#1a5276"
+  
+  plot_ly(type = "scatterpolar") %>%
+    add_trace(
+      r = gcc_values,
+      theta = categories,
+      fill = "toself",
+      fillcolor = "rgba(184, 163, 88, 0.2)",
+      line = list(color = "#B8A358", width = 2, dash = "dash"),
+      name = gcc_method
     ) %>%
-    mutate(
-      Year = as.numeric(gsub("Y", "", Year)),
-      Factor = factor(Factor, levels = c("Overall", "Econ Perf", "Gov Eff", "Bus Eff", "Infra"))
+    add_trace(
+      r = country_values,
+      theta = categories,
+      fill = "toself",
+      fillcolor = paste0(country_color, "40"),
+      line = list(color = country_color, width = 2),
+      name = selected_country
     ) %>%
-    filter(!is.na(Rank))
-  
-  plot_ly(
-    data = trend_data,
-    x = ~Year,
-    y = ~Rank,
-    color = ~Factor,
-    colors = c("#1a5276", "#2980b9", "#27ae60", "#8e44ad", "#e67e22"),
-    type = "scatter",
-    mode = "lines+markers",
-    text = ~paste0(Factor, " (", Year, ")<br>Rank: #", Rank),
-    hoverinfo = "text"
-  ) %>%
     layout(
-      title = list(
-        text = paste0("<b>", selected_country, ": 5-Year Factor Rankings</b><br><sup>Performance trend across all dimensions</sup>"),
-        x = 0
+      polar = list(
+        radialaxis = list(visible = TRUE, range = c(0, 100))
       ),
-      xaxis = list(
-        title = "Year",
-        tickmode = "linear",
-        dtick = 1
-      ),
-      yaxis = list(
-        title = "Rank (Lower is Better)",
-        autorange = "reversed"
-      ),
-      legend = list(orientation = "h", y = -0.2)
-    )
-}
-
-# ==========================================================================
-# CHART 9: Simple vs Weighted Comparison
-# ==========================================================================
-create_method_comparison_chart <- function(data) {
-  
-  comparison_data <- data$factors_2025 %>%
-    filter(Country %in% c("GCC (Simple)", "GCC (Weighted)")) %>%
-    select(Country, Overall_Score, EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score) %>%
-    pivot_longer(cols = -Country, names_to = "Dimension", values_to = "Score") %>%
-    mutate(
-      Method = gsub("GCC \\(|\\)", "", Country),
-      Dimension = case_when(
-        Dimension == "Overall_Score" ~ "Overall",
-        Dimension == "EconPerf_Score" ~ "Economic\nPerformance",
-        Dimension == "GovEff_Score" ~ "Government\nEfficiency",
-        Dimension == "BusEff_Score" ~ "Business\nEfficiency",
-        Dimension == "Infra_Score" ~ "Infrastructure"
-      )
-    )
-  
-  plot_ly(
-    data = comparison_data,
-    x = ~Dimension,
-    y = ~Score,
-    color = ~Method,
-    colors = c("#377eb8", "#e41a1c"),
-    type = "bar",
-    text = ~round(Score, 1),
-    textposition = "outside",
-    hoverinfo = "text+name",
-    hovertext = ~paste0(Dimension, "<br>Score: ", round(Score, 1))
-  ) %>%
-    layout(
-      title = list(
-        text = "<b>GCC Aggregation Methods Comparison</b><br><sup>Simple Average vs GDP-Weighted Average</sup>",
-        x = 0
-      ),
-      xaxis = list(title = ""),
-      yaxis = list(
-        title = "Score (0-100)",
-        range = c(0, 105)
-      ),
-      barmode = "group",
-      legend = list(orientation = "h", y = -0.15)
-    )
-}
-
-# ==========================================================================
-# CHART 10: GDP Weights Pie Chart
-# ==========================================================================
-create_gdp_weights_chart <- function(data) {
-  
-  gdp_data <- data$gdp_weights %>%
-    mutate(
-      Label = paste0(Country, "\n$", round(GDP_2024, 0), "B\n(", Weight_Pct, "%)")
-    )
-  
-  plot_ly(
-    data = gdp_data,
-    labels = ~Country,
-    values = ~GDP_2024,
-    type = "pie",
-    marker = list(
-      colors = c(gcc_colors["UAE"], gcc_colors["Qatar"], gcc_colors["Saudi Arabia"],
-                 gcc_colors["Bahrain"], gcc_colors["Oman"], gcc_colors["Kuwait"])
-    ),
-    textinfo = "label+percent",
-    textposition = "inside",
-    hoverinfo = "text",
-    hovertext = ~paste0(Country, "<br>GDP: $", round(GDP_2024, 1), " billion<br>Weight: ", Weight_Pct, "%")
-  ) %>%
-    layout(
-      title = list(
-        text = "<b>GCC GDP Distribution 2024</b><br><sup>Used for weighted aggregation</sup>",
-        x = 0.5
-      ),
-      showlegend = TRUE,
-      legend = list(orientation = "h", y = -0.1)
+      legend = list(orientation = "h", y = -0.1),
+      title = list(text = paste(selected_country, "vs", gcc_method), font = list(size = 14))
     )
 }

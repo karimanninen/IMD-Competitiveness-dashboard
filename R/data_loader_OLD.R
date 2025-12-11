@@ -1,49 +1,38 @@
 # ============================================================================
-# DATA_LOADER.R - Data Loading Functions for GCC Competitiveness Dashboard
+# DATA LOADER MODULE - GCC Competitiveness Dashboard
+# IMD World Competitiveness Ranking 2025
 # ============================================================================
 
-library(dplyr)
-library(tidyr)
-
-# ============================================================================
-# MAIN DATA LOADING FUNCTION
-# ============================================================================
 load_wcr_data <- function() {
   
   WCR_data <- list()
   
-  # --------------------------------------------------------------------------
+  # ==========================================================================
   # GDP WEIGHTS
-  # --------------------------------------------------------------------------
+  # ==========================================================================
   WCR_data$gdp_weights <- data.frame(
     Country = c("UAE", "Qatar", "Saudi Arabia", "Bahrain", "Oman", "Kuwait"),
-    GDP_2024 = c(552.3, 219.2, 1085.4, 46.9, 109.7, 160.2),
+    GDP_2024 = c(552.3, 219.2, 1085.4, 46.9, 109.7, 160.2),  # US$ billions
     stringsAsFactors = FALSE
-  ) %>%
-    mutate(
-      Total_GDP = sum(GDP_2024),
-      Weight_Pct = round(GDP_2024 / Total_GDP * 100, 1)
-    )
+  )
   
-  # --------------------------------------------------------------------------
+  # Calculate weight percentages
+  total_gdp <- sum(WCR_data$gdp_weights$GDP_2024)
+  WCR_data$gdp_weights$Weight_Pct <- round(WCR_data$gdp_weights$GDP_2024 / total_gdp * 100, 1)
+  
+  # ==========================================================================
   # OVERALL RANKINGS (2020-2025)
-  # --------------------------------------------------------------------------
+  # ==========================================================================
   base_rankings <- data.frame(
     Country = rep(c("UAE", "Saudi Arabia", "Qatar", "Bahrain", "Kuwait", "Oman"), each = 6),
     Year = rep(2020:2025, 6),
     Overall_Rank = c(
-      # UAE
-      9, 9, 12, 10, 7, 5,
-      # Saudi Arabia
-      24, 32, 24, 17, 16, 17,
-      # Qatar
-      14, 17, 18, 12, 11, 9,
-      # Bahrain
-      NA, NA, 30, 25, 21, 22,
-      # Kuwait
-      NA, NA, NA, 38, 37, 36,
-      # Oman
-      NA, NA, NA, NA, NA, 28
+      9, 9, 12, 10, 7, 5,      # UAE
+      24, 32, 24, 17, 16, 17,  # Saudi Arabia
+      14, 17, 18, 12, 11, 9,   # Qatar
+      NA, NA, 30, 25, 21, 22,  # Bahrain
+      NA, NA, NA, 38, 37, 36,  # Kuwait
+      NA, NA, NA, NA, NA, 28   # Oman
     ),
     stringsAsFactors = FALSE
   )
@@ -53,16 +42,20 @@ load_wcr_data <- function() {
     group_by(Year) %>%
     summarise(
       Overall_Rank = mean(Overall_Rank, na.rm = TRUE),
+      N_Countries = sum(!is.na(Overall_Rank)),
       .groups = 'drop'
     ) %>%
     mutate(Country = "GCC Average")
   
-  WCR_data$overall_rankings <- bind_rows(base_rankings, gcc_overall_agg) %>%
+  WCR_data$overall_rankings <- bind_rows(
+    base_rankings %>% mutate(N_Countries = NA_integer_), 
+    gcc_overall_agg
+  ) %>%
     arrange(Year, Country)
   
-  # --------------------------------------------------------------------------
+  # ==========================================================================
   # MAIN FACTOR SCORES AND RANKINGS (2025)
-  # --------------------------------------------------------------------------
+  # ==========================================================================
   country_factors <- data.frame(
     Country = c("UAE", "Saudi Arabia", "Qatar", "Bahrain", "Kuwait", "Oman"),
     Year = 2025,
@@ -81,9 +74,9 @@ load_wcr_data <- function() {
   
   # Merge with GDP weights
   country_factors <- country_factors %>%
-    left_join(WCR_data$gdp_weights %>% select(Country, GDP_2024), by = "Country")
+    left_join(WCR_data$gdp_weights, by = "Country")
   
-  # Calculate GCC aggregates (both simple and GDP-weighted)
+  # Calculate GCC aggregates
   gcc_simple <- country_factors %>%
     summarise(
       Country = "GCC (Simple)",
@@ -98,7 +91,8 @@ load_wcr_data <- function() {
       BusEff_Score = mean(BusEff_Score),
       Infra_Rank = mean(Infra_Rank),
       Infra_Score = mean(Infra_Score),
-      GDP_2024 = sum(GDP_2024)
+      GDP_2024 = sum(GDP_2024),
+      Weight_Pct = 100
     )
   
   gcc_weighted <- country_factors %>%
@@ -115,14 +109,15 @@ load_wcr_data <- function() {
       BusEff_Score = weighted.mean(BusEff_Score, GDP_2024),
       Infra_Rank = weighted.mean(Infra_Rank, GDP_2024),
       Infra_Score = weighted.mean(Infra_Score, GDP_2024),
-      GDP_2024 = sum(GDP_2024)
+      GDP_2024 = sum(GDP_2024),
+      Weight_Pct = 100
     )
   
   WCR_data$factors_2025 <- bind_rows(country_factors, gcc_simple, gcc_weighted)
   
-  # --------------------------------------------------------------------------
+  # ==========================================================================
   # SUB-FACTOR SCORES AND RANKINGS (2025)
-  # --------------------------------------------------------------------------
+  # ==========================================================================
   subfactor_list <- c(
     "Domestic Economy", "International Trade", "International Investment", "Employment", "Prices",
     "Public Finance", "Tax Policy", "Institutional Framework", "Business Legislation", "Societal Framework",
@@ -192,8 +187,8 @@ load_wcr_data <- function() {
       # Bahrain
       37, 17, 27, 45, 3,
       67, 5, 47, 9, 52,
-      14, 10, 37, 12, 8,
-      28, 17, 56, 40, 32,
+      14, 11, 35, 14, 8,
+      23, 14, 56, 40, 33,
       # Kuwait
       65, 35, 37, 27, 9,
       9, 4, 38, 44, 37,
@@ -208,9 +203,9 @@ load_wcr_data <- function() {
     stringsAsFactors = FALSE
   )
   
-  # Add GDP weights
+  # Add GDP weights to subfactors
   country_subfactors <- country_subfactors %>%
-    left_join(WCR_data$gdp_weights %>% select(Country, GDP_2024), by = "Country")
+    left_join(WCR_data$gdp_weights, by = "Country")
   
   # Calculate GCC aggregates for subfactors
   gcc_subfactor_simple <- country_subfactors %>%
@@ -232,15 +227,15 @@ load_wcr_data <- function() {
     )
   
   WCR_data$subfactors_2025 <- bind_rows(
-    country_subfactors %>% select(-GDP_2024),
+    country_subfactors %>% select(-GDP_2024, -Weight_Pct),
     gcc_subfactor_simple,
     gcc_subfactor_weighted
   ) %>%
     arrange(Country, Factor, Sub_Factor)
   
-  # --------------------------------------------------------------------------
+  # ==========================================================================
   # FIVE-YEAR FACTOR RANKINGS
-  # --------------------------------------------------------------------------
+  # ==========================================================================
   base_5yr <- data.frame(
     Country = rep(c("UAE", "Qatar", "Saudi Arabia", "Bahrain", "Oman", "Kuwait"), each = 5),
     Factor = rep(c("Overall", "Econ Perf", "Gov Eff", "Bus Eff", "Infra"), 6),
@@ -277,44 +272,24 @@ load_wcr_data <- function() {
     stringsAsFactors = FALSE
   )
   
-  # Calculate GCC average for 5-year trends
-  gcc_5yr_agg <- base_5yr %>%
-    pivot_longer(cols = starts_with("Y"), names_to = "Year", values_to = "Rank") %>%
-    mutate(Year = as.numeric(gsub("Y", "", Year))) %>%
-    group_by(Factor, Year) %>%
-    summarise(
-      Rank = mean(Rank, na.rm = TRUE),
-      .groups = 'drop'
-    ) %>%
-    pivot_wider(names_from = Year, values_from = Rank, names_prefix = "Y") %>%
-    mutate(Country = "GCC Average")
+  WCR_data$rankings_5yr <- base_5yr
   
-  WCR_data$rankings_5yr <- bind_rows(base_5yr, gcc_5yr_agg) %>%
-    arrange(Country, Factor)
-  
-  # --------------------------------------------------------------------------
-  # WORLD RANKINGS 2025
-  # --------------------------------------------------------------------------
+  # ==========================================================================
+  # WORLD RANKINGS 2025 (Top 40 + GCC countries)
+  # ==========================================================================
   WCR_data$world_rankings_2025 <- data.frame(
-    Rank = 1:69,
+    Rank = 1:40,
     Country = c("Switzerland", "Singapore", "Hong Kong SAR", "Denmark", "UAE",
-                "Taiwan (Chinese Taipei)", "Ireland", "Sweden", "Qatar", "Netherlands",
+                "Taiwan", "Ireland", "Sweden", "Qatar", "Netherlands",
                 "Canada", "Norway", "USA", "Finland", "Iceland", "China", "Saudi Arabia",
                 "Australia", "Germany", "Luxembourg", "Lithuania", "Bahrain", "Malaysia",
                 "Belgium", "Czech Republic", "Austria", "Korea Rep.", "Oman", "United Kingdom",
                 "Thailand", "New Zealand", "France", "Estonia", "Kazakhstan", "Japan",
-                "Kuwait", "Portugal", "Latvia", "Spain", "Indonesia", "India", "Chile",
-                "Italy", "Cyprus", "Puerto Rico", "Slovenia", "Jordan", "Hungary", "Romania",
-                "Greece", "Philippines", "Poland", "Croatia", "Colombia", "Mexico", "Kenya",
-                "Bulgaria", "Brazil", "Botswana", "Peru", "Ghana", "Argentina", "Slovak Republic",
-                "South Africa", "Mongolia", "Turkiye", "Nigeria", "Namibia", "Venezuela"),
+                "Kuwait", "Portugal", "Latvia", "Spain", "Indonesia"),
     Score = c(100.00, 99.44, 99.22, 97.51, 96.09, 93.71, 91.31, 90.20, 89.93, 89.75,
               88.73, 86.17, 84.27, 83.83, 83.49, 82.13, 82.09, 78.36, 78.24, 78.17,
               77.68, 76.56, 74.81, 74.57, 73.66, 73.55, 73.39, 72.86, 71.95, 71.32,
-              70.23, 69.93, 69.65, 68.99, 68.74, 68.69, 67.84, 67.03, 65.80, 64.32,
-              64.19, 62.52, 62.50, 61.80, 61.03, 59.14, 57.79, 56.71, 56.64, 55.33,
-              54.88, 53.91, 51.19, 49.66, 48.84, 48.29, 47.96, 46.41, 46.12, 45.89,
-              44.25, 42.84, 42.79, 41.98, 40.91, 40.41, 39.73, 37.48, 25.47),
+              70.23, 69.93, 69.65, 68.99, 68.74, 68.69, 67.84, 67.03, 65.80, 64.32),
     stringsAsFactors = FALSE
   ) %>%
     mutate(
@@ -329,16 +304,14 @@ load_wcr_data <- function() {
     Rank = NA,
     Country = "GCC (Simple)",
     Score = WCR_data$factors_2025$Overall_Score[WCR_data$factors_2025$Country == "GCC (Simple)"],
-    Region = "GCC Aggregate",
-    stringsAsFactors = FALSE
+    Region = "GCC Aggregate"
   )
   
   gcc_world_weighted <- data.frame(
     Rank = NA,
     Country = "GCC (Weighted)",
     Score = WCR_data$factors_2025$Overall_Score[WCR_data$factors_2025$Country == "GCC (Weighted)"],
-    Region = "GCC Aggregate",
-    stringsAsFactors = FALSE
+    Region = "GCC Aggregate"
   )
   
   WCR_data$world_rankings_with_gcc <- bind_rows(
@@ -349,5 +322,41 @@ load_wcr_data <- function() {
     arrange(desc(Score)) %>%
     mutate(Rank = row_number())
   
+  # ==========================================================================
+  # METADATA
+  # ==========================================================================
+  WCR_data$metadata <- list(
+    source = "IMD World Competitiveness Ranking",
+    year = 2025,
+    total_countries = 69,
+    gcc_countries = c("UAE", "Qatar", "Saudi Arabia", "Bahrain", "Kuwait", "Oman"),
+    dimensions = c("Economic Performance", "Government Efficiency", "Business Efficiency", "Infrastructure"),
+    subfactors_count = 20,
+    methodology = "The IMD World Competitiveness Ranking measures how economies manage their resources and competencies to increase their prosperity. The ranking is based on 256 criteria across four main factors.",
+    data_updated = Sys.Date()
+  )
+  
   return(WCR_data)
 }
+
+# Color palette for GCC countries
+gcc_colors <- c(
+  "UAE" = "#000000",
+  "Qatar" = "#99154C",
+  "Saudi Arabia" = "#008035",
+  "Bahrain" = "#E20000",
+  "Oman" = "#a3a3a3",
+  "Kuwait" = "#00B1E6",
+  "GCC Average" = "#B8A358",
+  "GCC (Simple)" = "#B8A358",
+  "GCC (Weighted)" = "#D4A017"
+)
+
+# Dimension colors
+dimension_colors <- c(
+  "Overall" = "#1a5276",
+  "Economic Performance" = "#2980b9",
+  "Government Efficiency" = "#27ae60",
+  "Business Efficiency" = "#8e44ad",
+  "Infrastructure" = "#e67e22"
+)
