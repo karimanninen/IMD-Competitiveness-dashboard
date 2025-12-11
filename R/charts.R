@@ -279,11 +279,15 @@ create_country_radar <- function(data, country) {
   categories <- c("Economic Performance", "Government Efficiency", 
                   "Business Efficiency", "Infrastructure")
   
+  # Create hovertext BEFORE closing the polygon
+  hover_text <- paste0(categories, ": ", round(values, 1))
+  
   # Close the polygon by repeating first value
   values <- c(values, values[1])
   categories <- c(categories, categories[1])
+  hover_text <- c(hover_text, hover_text[1])  # Also repeat hovertext!
   
-  # FIX: Use [[ ]] to get just the color value, not a named vector
+  # Get color
   color <- if (country %in% names(country_colors)) {
     as.character(country_colors[[country]])
   } else {
@@ -292,6 +296,7 @@ create_country_radar <- function(data, country) {
   
   plot_ly(
     type = "scatterpolar",
+    mode = "lines+markers",
     r = values,
     theta = categories,
     fill = "toself",
@@ -300,7 +305,7 @@ create_country_radar <- function(data, country) {
     marker = list(color = color, size = 8),
     name = country,
     hoverinfo = "text",
-    hovertext = paste0(categories[-length(categories)], ": ", round(values[-length(values)], 1))
+    hovertext = hover_text
   ) %>%
     layout(
       polar = list(
@@ -317,7 +322,6 @@ create_country_radar <- function(data, country) {
       title = list(text = paste(country, "- Factor Profile"), font = list(size = 14))
     )
 }
-
 
 # ============================================================================
 # 7. COUNTRY TREND CHART (5-year by factor)
