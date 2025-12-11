@@ -274,7 +274,7 @@ create_country_radar <- function(data, country) {
     filter(Country == country) %>%
     select(EconPerf_Score, GovEff_Score, BusEff_Score, Infra_Score)
   
-  # Prepare for radar - FIX: use unlist() to properly convert to numeric vector
+  # Prepare for radar
   values <- as.numeric(unlist(country_data[1, ]))
   categories <- c("Economic Performance", "Government Efficiency", 
                   "Business Efficiency", "Infrastructure")
@@ -283,7 +283,12 @@ create_country_radar <- function(data, country) {
   values <- c(values, values[1])
   categories <- c(categories, categories[1])
   
-  color <- if (country %in% names(country_colors)) country_colors[country] else "#1a5276"
+  # FIX: Use [[ ]] to get just the color value, not a named vector
+  color <- if (country %in% names(country_colors)) {
+    as.character(country_colors[[country]])
+  } else {
+    "#1a5276"
+  }
   
   plot_ly(
     type = "scatterpolar",
@@ -312,6 +317,7 @@ create_country_radar <- function(data, country) {
       title = list(text = paste(country, "- Factor Profile"), font = list(size = 14))
     )
 }
+
 
 # ============================================================================
 # 7. COUNTRY TREND CHART (5-year by factor)
@@ -512,10 +518,15 @@ create_overlay_radar_chart <- function(data, selected_country, gcc_method = "GCC
   categories <- c("Economic Performance", "Government Efficiency", 
                   "Business Efficiency", "Infrastructure", "Economic Performance")
   
-  country_values <- c(as.numeric(country_data[1, ]), as.numeric(country_data[1, 1]))
-  gcc_values <- c(as.numeric(gcc_data[1, ]), as.numeric(gcc_data[1, 1]))
+  country_values <- c(as.numeric(unlist(country_data[1, ])), as.numeric(unlist(country_data[1, 1])))
+  gcc_values <- c(as.numeric(unlist(gcc_data[1, ])), as.numeric(unlist(gcc_data[1, 1])))
   
-  country_color <- if (selected_country %in% names(country_colors)) country_colors[selected_country] else "#1a5276"
+  # FIX: Use [[ ]] to get just the color value
+  country_color <- if (selected_country %in% names(country_colors)) {
+    as.character(country_colors[[selected_country]])
+  } else {
+    "#1a5276"
+  }
   
   plot_ly(type = "scatterpolar") %>%
     add_trace(

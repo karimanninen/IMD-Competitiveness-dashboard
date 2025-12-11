@@ -1197,7 +1197,7 @@ server <- function(input, output, session) {
              `Bus Eff Score` = BusEff_Score, `Bus Eff Rank` = BusEff_Rank,
              `Infra Score` = Infra_Score, `Infra Rank` = Infra_Rank) %>%
       mutate(across(contains("Score"), ~round(., 1)))
-  }, options = list(dom = 't', scrollX = TRUE))
+  }, options = list(dom = 't', scrollX = TRUE), rownames = FALSE)
   
   output$country_trend <- renderPlotly({
     create_country_trend(wcr_data(), input$selected_country)
