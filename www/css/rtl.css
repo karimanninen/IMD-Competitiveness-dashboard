@@ -1,0 +1,396 @@
+/* ============================================================================
+   RTL SUPPORT FOR ARABIC LANGUAGE
+   GCC Competitiveness Dashboard
+   ============================================================================ */
+
+/* ============================================================================
+   GOOGLE FONTS IMPORT (Add to HTML head or main CSS)
+   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap');
+
+/* ============================================================================
+   BASE RTL SETTINGS
+   ============================================================================ */
+
+/* When RTL mode is active via class */
+body.rtl-mode {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Noto Sans Arabic', 'Cairo', 'Tajawal', sans-serif;
+}
+
+/* When RTL mode is active via HTML attribute */
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Arabic typography - ensure proper rendering */
+.rtl-mode,
+html[dir="rtl"] {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings in Arabic */
+.rtl-mode h1, .rtl-mode h2, .rtl-mode h3, 
+.rtl-mode h4, .rtl-mode h5, .rtl-mode h6 {
+  font-family: 'Cairo', 'Noto Sans Arabic', sans-serif;
+  font-weight: 700;
+}
+
+/* ============================================================================
+   LANGUAGE TOGGLE
+   ============================================================================ */
+
+.language-toggle {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1100;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.language-toggle:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.language-toggle label {
+  margin: 0;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.language-toggle label:hover {
+  background: rgba(26, 82, 118, 0.1);
+}
+
+.language-toggle .active-lang {
+  color: #1a5276;
+  font-weight: 700;
+  background: rgba(26, 82, 118, 0.1);
+}
+
+.language-toggle .lang-separator {
+  color: #ccc;
+  font-weight: 300;
+}
+
+/* RTL mode - move toggle to left */
+.rtl-mode .language-toggle {
+  right: auto;
+  left: 1.5rem;
+}
+
+/* ============================================================================
+   NAVIGATION DOTS
+   ============================================================================ */
+
+/* Flip navigation dots to left side in RTL */
+.rtl-mode .nav-dots {
+  right: auto;
+  left: 2rem;
+}
+
+/* ============================================================================
+   LOGO POSITIONING
+   ============================================================================ */
+
+/* Mirror logo position in RTL */
+.rtl-mode .logo-container,
+.rtl-mode [style*="position: absolute"][style*="left: 1.5rem"] {
+  left: auto !important;
+  right: 1.5rem !important;
+}
+
+/* ============================================================================
+   CONTENT LAYOUT
+   ============================================================================ */
+
+/* Flip grid layouts for RTL */
+.rtl-mode .content-wrapper {
+  grid-template-columns: 1.5fr 1fr;
+}
+
+.rtl-mode .content-wrapper.centered {
+  grid-template-columns: 1fr;
+  text-align: center;
+}
+
+.rtl-mode .content-wrapper.reversed {
+  grid-template-columns: 1fr 1.5fr;
+}
+
+/* ============================================================================
+   LISTS AND TEXT ELEMENTS
+   ============================================================================ */
+
+/* Lists and bullet points - flip padding */
+.rtl-mode ul,
+.rtl-mode ol {
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+.rtl-mode li {
+  text-align: right;
+}
+
+/* Callout box - flip border */
+.rtl-mode .callout-box {
+  border-left: none;
+  border-right: 4px solid #B8A358;
+  border-radius: 8px 0 0 8px;
+}
+
+/* Country indicator dots - flip margin */
+.rtl-mode .country-dot {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+/* ============================================================================
+   CHARTS AND DATA VISUALIZATION
+   ============================================================================ */
+
+/* Chart containers - keep LTR for Plotly internals */
+.rtl-mode .chart-container {
+  direction: ltr;
+}
+
+/* But RTL for chart titles and labels we control externally */
+.rtl-mode .chart-container .chart-title,
+.rtl-mode .chart-container .chart-subtitle {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Plotly modebar - keep in same position */
+.rtl-mode .plotly .modebar {
+  direction: ltr;
+}
+
+/* ============================================================================
+   FORM CONTROLS
+   ============================================================================ */
+
+/* Control panel adjustments */
+.rtl-mode .control-panel {
+  text-align: right;
+}
+
+.rtl-mode .control-row {
+  flex-direction: row-reverse;
+}
+
+/* Select inputs */
+.rtl-mode .selectize-input,
+.rtl-mode .form-select,
+.rtl-mode select {
+  text-align: right;
+  padding-right: 12px;
+  padding-left: 30px; /* Space for dropdown arrow */
+}
+
+/* Dropdown arrow position */
+.rtl-mode .selectize-control::after,
+.rtl-mode .form-select::after {
+  right: auto;
+  left: 10px;
+}
+
+/* Switch/toggle inputs */
+.rtl-mode .bootstrap-switch {
+  direction: ltr; /* Keep switch direction consistent */
+}
+
+/* ============================================================================
+   CARDS AND CONTAINERS
+   ============================================================================ */
+
+/* Recommendation cards */
+.rtl-mode .recommendation-card {
+  text-align: right;
+}
+
+.rtl-mode .recommendation-card h4 {
+  text-align: right;
+}
+
+/* ============================================================================
+   HERO SECTION
+   ============================================================================ */
+
+/* Keep hero centered regardless of language */
+.rtl-mode .hero-title,
+.rtl-mode .hero-subtitle,
+.rtl-mode .section-hero .narrative-text {
+  text-align: center;
+}
+
+/* ============================================================================
+   SCROLL INDICATOR
+   ============================================================================ */
+
+/* Keep scroll indicator centered */
+.rtl-mode .scroll-indicator {
+  transform: translateX(-50%);
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+
+.rtl-mode .dashboard-footer {
+  text-align: center;
+}
+
+/* ============================================================================
+   SPECIFIC SECTION ADJUSTMENTS
+   ============================================================================ */
+
+/* Key fact section - keep centered */
+.rtl-mode .section-gold .big-number,
+.rtl-mode .section-gold .big-number-label,
+.rtl-mode .section-gold p {
+  text-align: center;
+}
+
+/* Dark section text */
+.rtl-mode .section-dark .narrative-text {
+  text-align: right;
+}
+
+.rtl-mode .section-dark h2 {
+  text-align: right;
+}
+
+/* ============================================================================
+   RESPONSIVE RTL ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 992px) {
+  .rtl-mode .content-wrapper,
+  .rtl-mode .content-wrapper.reversed {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .rtl-mode .nav-dots {
+    left: 1rem;
+    right: auto;
+  }
+  
+  .rtl-mode .language-toggle {
+    left: 1rem;
+    right: auto;
+    top: 1rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  /* Reduce logo size on mobile */
+  .rtl-mode .logo-container img {
+    max-width: 100px;
+  }
+}
+
+@media (max-width: 576px) {
+  .rtl-mode .language-toggle {
+    top: 0.5rem;
+    left: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .rtl-mode h2 {
+    font-size: 1.8rem;
+  }
+  
+  .rtl-mode .hero-title {
+    font-size: 2rem;
+  }
+  
+  .rtl-mode .big-number {
+    font-size: 4rem;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES FOR RTL
+   ============================================================================ */
+
+@media print {
+  .rtl-mode {
+    direction: rtl;
+  }
+  
+  .rtl-mode .language-toggle,
+  .rtl-mode .nav-dots {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   ANIMATION ADJUSTMENTS
+   ============================================================================ */
+
+/* Flip animations for RTL where relevant */
+.rtl-mode .slide-in-left {
+  animation-name: slideInRight;
+}
+
+.rtl-mode .slide-in-right {
+  animation-name: slideInLeft;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   UTILITIES
+   ============================================================================ */
+
+/* Force LTR for specific elements (numbers, etc.) */
+.rtl-mode .ltr-force {
+  direction: ltr !important;
+  unicode-bidi: embed;
+}
+
+/* Force RTL for specific elements */
+.rtl-mode .rtl-force {
+  direction: rtl !important;
+  unicode-bidi: embed;
+}
+
+/* Numeric values should remain LTR */
+.rtl-mode .number-value {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
