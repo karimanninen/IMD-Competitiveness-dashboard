@@ -471,6 +471,253 @@ translations <- list(
   opportunity_40pts = list(
     en = "40-point opportunity",
     ar = "فرصة 40 نقطة"
+  ),
+
+  # === LANDING PAGE ADDITIONAL ===
+  gcc_countries_label = list(en = "GCC Countries", ar = "دول مجلس التعاون"),
+  global_ranking_label = list(en = "Global Ranking", ar = "التصنيف العالمي"),
+  gcc_score_label = list(en = "GCC Score", ar = "درجة مجلس التعاون"),
+  combined_gdp_label = list(en = "Combined GDP", ar = "الناتج المحلي المجمع"),
+  four_factors_title = list(en = "Four Competitiveness Factors", ar = "عوامل التنافسية الأربعة"),
+  econ_perf_desc = list(
+    en = "Domestic economy, international trade, investment, employment, and prices",
+    ar = "الاقتصاد المحلي والتجارة الدولية والاستثمار والتوظيف والأسعار"
+  ),
+  gov_eff_desc = list(
+    en = "Public finance, tax policy, institutional framework, and legislation",
+    ar = "المالية العامة والسياسة الضريبية والإطار المؤسسي والتشريعات"
+  ),
+  bus_eff_desc = list(
+    en = "Productivity, labor market, finance, and management practices",
+    ar = "الإنتاجية وسوق العمل والتمويل وممارسات الإدارة"
+  ),
+  infra_desc = list(
+    en = "Basic, technological, scientific infrastructure, health, and education",
+    ar = "البنية التحتية الأساسية والتقنية والعلمية والصحة والتعليم"
+  ),
+  landing_about_title = list(
+    en = "IMD World Competitiveness Ranking 2025",
+    ar = "تصنيف التنافسية العالمية IMD 2025"
+  ),
+  landing_about_p1 = list(
+    en = "The IMD World Competitiveness Ranking measures how 69 economies manage their resources and competencies to increase prosperity. This dashboard analyzes GCC performance as both individual nations and as a unified economic bloc, revealing how regional cooperation enhances global competitiveness.",
+    ar = "يقيس تصنيف التنافسية العالمية IMD كيفية إدارة 69 اقتصاداً لمواردها وكفاءاتها لزيادة الازدهار. تحلل هذه اللوحة أداء دول مجلس التعاون كدول فردية وككتلة اقتصادية موحدة، مما يكشف كيف يعزز التعاون الإقليمي التنافسية العالمية."
+  ),
+  landing_about_p2 = list(
+    en = "Using GDP-weighted aggregation, we demonstrate that if the GCC were a single country, it would rank 12th globally with a score of 84.9—ahead of the United States, Finland, and Iceland.",
+    ar = "باستخدام التجميع الموزون بالناتج المحلي، نوضح أنه لو كان مجلس التعاون دولة واحدة، لاحتل المرتبة 12 عالمياً بدرجة 84.9—متقدماً على الولايات المتحدة وفنلندا وآيسلندا."
+  ),
+  landing_copyright = list(
+    en = "© 2025 GCC Statistical Center (GCC-Stat)",
+    ar = "© 2025 المركز الإحصائي لدول مجلس التعاون (GCC-Stat)"
+  ),
+  landing_datasource = list(
+    en = "Data Source: IMD World Competitiveness Center",
+    ar = "مصدر البيانات: مركز التنافسية العالمية IMD"
+  ),
+  explore_dashboard = list(
+    en = "Explore the Dashboard",
+    ar = "استكشف اللوحة"
+  ),
+
+  # === DASHBOARD NAV & TABS ===
+  tab_home = list(en = "Home", ar = "الرئيسية"),
+  tab_metadata = list(en = "Metadata", ar = "البيانات الوصفية"),
+  tab_gcc_aggregate = list(en = "GCC Aggregate", ar = "مجمل مجلس التعاون"),
+  tab_country_data = list(en = "Country Data", ar = "بيانات الدول"),
+  tab_analysis = list(en = "Analysis", ar = "التحليل"),
+  tab_recommendations = list(en = "Recommendations", ar = "التوصيات"),
+  back_to_welcome = list(en = "Back to Welcome", ar = "العودة للرئيسية"),
+
+  # === HOME TAB ===
+  gcc_overall_score = list(en = "GCC Overall Score", ar = "الدرجة الإجمالية لمجلس التعاون"),
+  countries_in_top20 = list(en = "Countries in Top 20", ar = "دول في العشرين الأوائل"),
+  gcc_member_countries = list(en = "GCC Member Countries", ar = "دول مجلس التعاون الأعضاء"),
+  all_six_ranked = list(
+    en = "All six GCC countries are now ranked in the IMD World Competitiveness Index.",
+    ar = "جميع دول مجلس التعاون الست مصنفة الآن في مؤشر التنافسية العالمية IMD."
+  ),
+  key_highlights = list(en = "Key Highlights", ar = "أبرز النقاط"),
+  highlight_uae = list(en = "UAE climbed to 5th place globally", ar = "الإمارات صعدت إلى المركز الخامس عالمياً"),
+  highlight_saudi = list(en = "Saudi Arabia: from 32nd (2021) to 17th (2025)", ar = "السعودية: من المرتبة 32 (2021) إلى 17 (2025)"),
+  highlight_qatar = list(en = "Qatar maintains top 10 position", ar = "قطر تحافظ على مركزها ضمن العشرة الأوائل"),
+  highlight_buseff = list(en = "Business Efficiency is strongest (Score: 82.6)", ar = "كفاءة الأعمال هي الأقوى (الدرجة: 82.6)"),
+  gcc_global_context = list(en = "GCC in Global Context", ar = "مجلس التعاون في السياق العالمي"),
+  five_year_trajectory = list(en = "5-Year Trajectory", ar = "المسار على مدى 5 سنوات"),
+
+  # === METADATA TAB ===
+  about_imd_title = list(en = "About the IMD World Competitiveness Ranking", ar = "حول تصنيف التنافسية العالمية IMD"),
+  overview = list(en = "Overview", ar = "نظرة عامة"),
+  about_imd_overview = list(
+    en = "The IMD World Competitiveness Ranking measures how economies manage their resources and competencies to increase their prosperity.",
+    ar = "يقيس تصنيف التنافسية العالمية IMD كيفية إدارة الاقتصادات لمواردها وكفاءاتها لزيادة ازدهارها."
+  ),
+  methodology = list(en = "Methodology", ar = "المنهجية"),
+  methodology_desc = list(
+    en = "The ranking is based on 256 criteria across four main factors.",
+    ar = "يعتمد التصنيف على 256 معياراً عبر أربعة عوامل رئيسية."
+  ),
+  method_stat_data = list(en = "Two-thirds from statistical data", ar = "الثلثان من البيانات الإحصائية"),
+  method_survey = list(en = "One-third from executive surveys", ar = "الثلث من استطلاعات المديرين التنفيذيين"),
+  method_equal_weight = list(en = "Each factor has 25% weight", ar = "لكل عامل وزن 25%"),
+  four_factors = list(en = "The Four Competitiveness Factors", ar = "عوامل التنافسية الأربعة"),
+  factor_trade = list(en = "Trade, investment, employment", ar = "التجارة والاستثمار والتوظيف"),
+  factor_policy = list(en = "Finance, policy, institutions", ar = "المالية والسياسات والمؤسسات"),
+  factor_productivity = list(en = "Productivity, labor, finance", ar = "الإنتاجية والعمالة والتمويل"),
+  factor_tech = list(en = "Tech, science, education", ar = "التقنية والعلوم والتعليم"),
+  agg_methodology_title = list(en = "GCC Aggregation Methodology", ar = "منهجية تجميع مجلس التعاون"),
+  two_approaches = list(en = "Two Aggregation Approaches", ar = "نهجان للتجميع"),
+  simple_avg_desc = list(en = "Equal weight to all six countries.", ar = "وزن متساوٍ لجميع الدول الست."),
+  gdp_weighted_avg = list(en = "GDP-Weighted Average", ar = "المتوسط الموزون بالناتج المحلي"),
+  gdp_weighted_avg_desc = list(en = "Countries weighted by economic size.", ar = "الدول مرجحة بحسب الحجم الاقتصادي."),
+  gdp_weights_label = list(en = "GDP Weights (2024)", ar = "أوزان الناتج المحلي (2024)"),
+  data_summary = list(en = "Data Summary", ar = "ملخص البيانات"),
+  dataset_info = list(en = "Dataset Information", ar = "معلومات مجموعة البيانات"),
+  source_label = list(en = "Source:", ar = "المصدر:"),
+  year_label = list(en = "Year:", ar = "السنة:"),
+  countries_ranked_label = list(en = "Countries Ranked:", ar = "الدول المصنفة:"),
+  gcc_countries_count = list(en = "GCC Countries:", ar = "دول مجلس التعاون:"),
+  main_factors_label = list(en = "Main Factors:", ar = "العوامل الرئيسية:"),
+  sub_factors_label = list(en = "Sub-Factors:", ar = "العوامل الفرعية:"),
+
+  # === GCC AGGREGATE TAB ===
+  gcc_single_country_desc = list(
+    en = "The GCC would rank among the world's top 15 most competitive economies",
+    ar = "سيحتل مجلس التعاون مرتبة بين أكثر 15 اقتصاداً تنافسية في العالم"
+  ),
+  aggregation_settings = list(en = "Aggregation Settings", ar = "إعدادات التجميع"),
+  select_method = list(en = "Select Method:", ar = "اختر الطريقة:"),
+  gcc_aggregate_scores = list(en = "GCC Aggregate Scores", ar = "درجات مجلس التعاون المجمعة"),
+  gcc_world_position = list(en = "GCC Position in World Rankings", ar = "موقع مجلس التعاون في التصنيف العالمي"),
+  simple_vs_gdp = list(en = "Simple vs GDP-Weighted Comparison", ar = "مقارنة المتوسط البسيط مع الموزون"),
+  gdp_distribution = list(en = "GDP Weight Distribution", ar = "توزيع أوزان الناتج المحلي"),
+  dimension_performance = list(en = "Dimension-Level Performance", ar = "الأداء على مستوى الأبعاد"),
+  gdp_weighted_method_desc = list(
+    en = "GDP-weighted: SAU 50%, UAE 25%, others share remaining 25%.",
+    ar = "الموزون بالناتج المحلي: السعودية 50%، الإمارات 25%، الباقي يتشاركون 25%."
+  ),
+  simple_method_desc = list(
+    en = "Simple average: All six countries weighted equally.",
+    ar = "المتوسط البسيط: جميع الدول الست بأوزان متساوية."
+  ),
+
+  # === COUNTRY DATA TAB ===
+  select_country_header = list(en = "Select Country", ar = "اختر الدولة"),
+  choose_gcc_country = list(en = "Choose a GCC Country:", ar = "اختر دولة خليجية:"),
+  competitiveness_profile = list(en = "Competitiveness Profile", ar = "ملف التنافسية"),
+  rank_label = list(en = "Rank #", ar = "المرتبة #"),
+  score_label = list(en = "Score:", ar = "الدرجة:"),
+  dimension_scores_rankings = list(en = "Dimension Scores & Rankings", ar = "درجات وتصنيفات الأبعاد"),
+  five_year_factor = list(en = "5-Year Factor Rankings", ar = "تصنيفات العوامل على 5 سنوات"),
+  subfactor_performance = list(en = "Sub-Factor Performance", ar = "أداء العوامل الفرعية"),
+  filter_by_factor = list(en = "Filter by Factor:", ar = "تصفية بحسب العامل:"),
+  all_label = list(en = "All", ar = "الكل"),
+
+  # === ANALYSIS TAB ===
+  comparative_analysis = list(en = "Comparative Analysis", ar = "التحليل المقارن"),
+  five_year_trends = list(en = "5-Year Trends", ar = "اتجاهات 5 سنوات"),
+  country_comparison = list(en = "Country Comparison", ar = "مقارنة الدول"),
+  subfactor_deep_dive = list(en = "Sub-Factor Deep Dive", ar = "التعمق في العوامل الفرعية"),
+  select_countries_label = list(en = "Select Countries:", ar = "اختر الدول:"),
+  performance_summary = list(en = "Performance Summary (2021-2025)", ar = "ملخص الأداء (2021-2025)"),
+  key_insights = list(en = "Key Insights", ar = "رؤى رئيسية"),
+  biggest_improver = list(en = "Biggest Improver", ar = "الأكثر تحسناً"),
+  biggest_improver_desc = list(en = "Saudi Arabia improved 15 positions", ar = "السعودية تحسنت 15 مركزاً"),
+  highest_ranked = list(en = "Highest Ranked", ar = "الأعلى تصنيفاً"),
+  highest_ranked_desc = list(en = "UAE reached #5 globally", ar = "الإمارات وصلت للمرتبة الخامسة عالمياً"),
+  gcc_heatmap = list(en = "GCC Countries Competitiveness Heatmap", ar = "خريطة حرارية لتنافسية دول مجلس التعاون"),
+  full_comparison_table = list(en = "Full Comparison Table", ar = "جدول المقارنة الكامل"),
+  select_factor = list(en = "Select Factor:", ar = "اختر العامل:"),
+  subfactors_label = list(en = "Sub-Factors:", ar = "العوامل الفرعية:"),
+  subfactor_comparison = list(en = "Sub-Factor Comparison", ar = "مقارنة العوامل الفرعية"),
+
+  # === RECOMMENDATIONS TAB ===
+  can_gcc_top10 = list(
+    en = "Can the GCC Break Into the Global Top 10?",
+    ar = "هل يستطيع مجلس التعاون الدخول إلى العشرة الأوائل عالمياً؟"
+  ),
+  gap_analysis = list(en = "Gap Analysis", ar = "تحليل الفجوات"),
+  strengths_weaknesses = list(en = "Strengths & Weaknesses", ar = "نقاط القوة والضعف"),
+  top_strengths = list(en = "Top Strengths", ar = "أبرز نقاط القوة"),
+  areas_improvement = list(en = "Areas for Improvement", ar = "مجالات التحسين"),
+  strategic_recommendations = list(en = "Strategic Recommendations", ar = "التوصيات الاستراتيجية"),
+  rec_infra_short = list(
+    en = "Close the 15-point gap by accelerating R&D spending and digital infrastructure.",
+    ar = "سد فجوة الـ15 نقطة من خلال تسريع الإنفاق على البحث والتطوير والبنية التحتية الرقمية."
+  ),
+  rec_sustain_short = list(
+    en = "Transform environmental challenges into competitive advantages.",
+    ar = "تحويل التحديات البيئية إلى مزايا تنافسية."
+  ),
+  rec_human_short = list(
+    en = "Strengthen higher education and STEM capabilities.",
+    ar = "تعزيز التعليم العالي وقدرات العلوم والتقنية والهندسة والرياضيات."
+  ),
+  rec_integration_short = list(
+    en = "Deepen economic cooperation across the $2.2 trillion GCC market.",
+    ar = "تعميق التعاون الاقتصادي عبر سوق مجلس التعاون البالغ 2.2 تريليون دولار."
+  ),
+
+  # === CAROUSEL QUOTES ===
+  quote_1 = list(
+    en = "The GCC has emerged as a global economic powerhouse—with a combined GDP of $2.2 trillion, the region now competes with established economies worldwide.",
+    ar = "برز مجلس التعاون الخليجي كقوة اقتصادية عالمية—بناتج محلي إجمالي يبلغ 2.2 تريليون دولار، تنافس المنطقة الآن الاقتصادات الراسخة حول العالم."
+  ),
+  quote_2 = list(
+    en = "Three GCC nations rank in the global top 20—UAE at #5, Qatar at #9, and Saudi Arabia at #17—a remarkable concentration of competitiveness.",
+    ar = "ثلاث دول خليجية تحتل مراتب ضمن العشرين الأوائل عالمياً—الإمارات في المركز الخامس وقطر في التاسع والسعودية في السابع عشر—تركيز استثنائي للتنافسية."
+  ),
+  quote_3 = list(
+    en = "Business efficiency is the GCC's strongest dimension, scoring 82.6 and ranking 11th globally, reflecting decades of regulatory reforms.",
+    ar = "كفاءة الأعمال هي أقوى أبعاد مجلس التعاون، بدرجة 82.6 والمرتبة 11 عالمياً، مما يعكس عقوداً من الإصلاحات التنظيمية."
+  ),
+  quote_4 = list(
+    en = "Saudi Arabia achieved the region's most dramatic transformation—leaping 15 positions from 32nd to 17th between 2021 and 2025.",
+    ar = "حققت السعودية أكثر تحولات المنطقة دراماتيكية—قفزة 15 مركزاً من 32 إلى 17 بين عامي 2021 و2025."
+  ),
+  quote_5 = list(
+    en = "Together, the six GCC nations create a complementary ecosystem where investors find exactly the competitive advantages they need.",
+    ar = "معاً، تشكّل دول مجلس التعاون الست منظومة متكاملة يجد فيها المستثمرون المزايا التنافسية التي يحتاجونها."
+  ),
+
+  # === TABLE COLUMN HEADERS ===
+  col_gdp_billion = list(en = "GDP ($ Billion)", ar = "الناتج المحلي (مليار $)"),
+  col_weight_pct = list(en = "Weight (%)", ar = "الوزن (%)"),
+  col_econ_perf_score = list(en = "Econ Perf Score", ar = "درجة الأداء الاقتصادي"),
+  col_econ_perf_rank = list(en = "Econ Perf Rank", ar = "مرتبة الأداء الاقتصادي"),
+  col_gov_eff_score = list(en = "Gov Eff Score", ar = "درجة كفاءة الحكومة"),
+  col_gov_eff_rank = list(en = "Gov Eff Rank", ar = "مرتبة كفاءة الحكومة"),
+  col_bus_eff_score = list(en = "Bus Eff Score", ar = "درجة كفاءة الأعمال"),
+  col_bus_eff_rank = list(en = "Bus Eff Rank", ar = "مرتبة كفاءة الأعمال"),
+  col_infra_score = list(en = "Infra Score", ar = "درجة البنية التحتية"),
+  col_infra_rank = list(en = "Infra Rank", ar = "مرتبة البنية التحتية"),
+  col_overall = list(en = "Overall", ar = "الإجمالي"),
+  col_econ_perf = list(en = "Econ Perf", ar = "الأداء الاقتصادي"),
+  col_gov_eff = list(en = "Gov Eff", ar = "كفاءة الحكومة"),
+  col_bus_eff = list(en = "Bus Eff", ar = "كفاءة الأعمال"),
+  col_infra = list(en = "Infra", ar = "البنية التحتية"),
+  col_factor = list(en = "Factor", ar = "العامل"),
+  col_subfactor = list(en = "Sub-Factor", ar = "العامل الفرعي"),
+  col_change = list(en = "Change", ar = "التغيير"),
+  col_overall_rank = list(en = "Overall Rank", ar = "المرتبة الإجمالية"),
+  col_overall_score = list(en = "Overall Score", ar = "الدرجة الإجمالية"),
+
+  # === CHART LABELS FOR CHARTS.R ===
+  chart_simple_vs_gdp = list(en = "Simple Average vs GDP-Weighted", ar = "المتوسط البسيط مقابل الموزون بالناتج المحلي"),
+  chart_gdp_distribution = list(en = "GDP Distribution (2024)", ar = "توزيع الناتج المحلي (2024)"),
+  chart_performance_by_dim = list(en = "GCC Performance by Dimension", ar = "أداء مجلس التعاون حسب البُعد"),
+  chart_factor_profile = list(en = "Factor Profile", ar = "ملف العوامل"),
+  chart_factor_rankings = list(en = "Factor Rankings Over Time", ar = "تصنيفات العوامل عبر الزمن"),
+  chart_subfactor_scores = list(en = "Sub-Factor Scores", ar = "درجات العوامل الفرعية"),
+  chart_rank_lower_better = list(en = "Rank (lower is better)", ar = "المرتبة (الأقل أفضل)"),
+  chart_vs = list(en = "vs", ar = "مقابل"),
+  chart_achieved = list(en = "Achieved", ar = "المحقق"),
+  chart_gap_to_100 = list(en = "Gap to 100", ar = "الفجوة إلى 100"),
+
+  # === FOOTER NAV ===
+  nav_footer = list(
+    en = "GCC-Stat | IMD World Competitiveness Ranking 2025",
+    ar = "GCC-Stat | تصنيف التنافسية العالمية IMD 2025"
   )
 )
 
